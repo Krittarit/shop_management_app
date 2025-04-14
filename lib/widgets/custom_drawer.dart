@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:shop_management_app/screens/report/sales_report_screen.dart';
 import 'package:shop_management_app/services/theme_provider.dart';
 
-// Widget Drawer สำหรับเมนูหลักของแอปพลิเคชัน
 class CustomDrawer extends StatelessWidget {
-  final Function(ThemeType) onThemeChanged; // เพิ่ม callback
-  final ThemeType currentTheme; // เพิ่ม currentTheme
+  final Function(ThemeType) onThemeChanged;
+  final ThemeType currentTheme;
 
   const CustomDrawer({
     super.key,
@@ -19,7 +18,6 @@ class CustomDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // หัว Drawer
           DrawerHeader(
             decoration: BoxDecoration(
               color: Theme.of(context).colorScheme.primary,
@@ -56,10 +54,6 @@ class CustomDrawer extends StatelessWidget {
               ],
             ),
           ),
-
-          // รายการเมนู
-
-          // หน้าหลัก
           ListTile(
             leading: const Icon(Icons.dashboard),
             title: const Text('หน้าหลัก'),
@@ -67,8 +61,6 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pushReplacementNamed(context, '/');
             },
           ),
-
-          // จัดการสมาชิก
           ListTile(
             leading: const Icon(Icons.people),
             title: const Text('จัดการสมาชิก'),
@@ -77,8 +69,6 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/members');
             },
           ),
-
-          // จัดการสินค้า
           ListTile(
             leading: const Icon(Icons.inventory),
             title: const Text('จัดการสินค้า'),
@@ -87,13 +77,10 @@ class CustomDrawer extends StatelessWidget {
               Navigator.pushNamed(context, '/products');
             },
           ),
-
-          // จัดการการขาย (Submenu)
           ExpansionTile(
             leading: const Icon(Icons.shopping_cart),
             title: const Text('จัดการการขาย'),
             children: [
-              // บันทึกการขายใหม่
               ListTile(
                 leading: const Icon(Icons.add_shopping_cart, size: 20),
                 title: const Text('บันทึกการขายใหม่'),
@@ -103,8 +90,6 @@ class CustomDrawer extends StatelessWidget {
                   Navigator.pushNamed(context, '/sales/new');
                 },
               ),
-
-              // ประวัติการขาย
               ListTile(
                 leading: const Icon(Icons.history, size: 20),
                 title: const Text('ประวัติการขาย'),
@@ -116,8 +101,6 @@ class CustomDrawer extends StatelessWidget {
               ),
             ],
           ),
-
-          // รายงาน (ใหม่)
           ListTile(
             leading: const Icon(Icons.bar_chart),
             title: const Text('รายงานการขาย'),
@@ -126,20 +109,24 @@ class CustomDrawer extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => const SalesReportScreen(),
-                ),
+                    builder: (context) => const SalesReportScreen()),
               );
             },
           ),
-
+          ListTile(
+            leading: const Icon(Icons.import_export),
+            title: const Text('นำเข้า/ส่งออกข้อมูล'),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushNamed(
+                  context, '/data/import_export'); // เปลี่ยนเป้าหมาย
+            },
+          ),
           const Divider(),
-
-          // ตั้งค่าธีม - แก้ให้ใช้ callback แทน Provider
           ExpansionTile(
             leading: const Icon(Icons.color_lens),
             title: const Text('ตั้งค่าธีม'),
             children: [
-              // ธีม Light
               RadioListTile<ThemeType>(
                 title: const Text('โหมดสว่าง'),
                 value: ThemeType.light,
@@ -151,8 +138,6 @@ class CustomDrawer extends StatelessWidget {
                   }
                 },
               ),
-
-              // ธีม Dark
               RadioListTile<ThemeType>(
                 title: const Text('โหมดมืด'),
                 value: ThemeType.dark,
@@ -164,8 +149,6 @@ class CustomDrawer extends StatelessWidget {
                   }
                 },
               ),
-
-              // ธีม Custom (UIIAIuiIUA)
               RadioListTile<ThemeType>(
                 title: const Text('ธีม UIIAIuiIUA'),
                 value: ThemeType.custom,
@@ -179,8 +162,6 @@ class CustomDrawer extends StatelessWidget {
               ),
             ],
           ),
-
-          // เกี่ยวกับแอป
           ListTile(
             leading: const Icon(Icons.info),
             title: const Text('เกี่ยวกับ'),
@@ -194,7 +175,6 @@ class CustomDrawer extends StatelessWidget {
     );
   }
 
-  // แสดงหน้าต่างข้อมูลเกี่ยวกับแอป
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,

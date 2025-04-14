@@ -96,8 +96,12 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
                           label: 'วันนี้',
                           onTap: () {
                             setState(() {
-                              _startDate = DateTime.now();
-                              _endDate = DateTime.now();
+                              // แก้ไขจาก DateTime.now() เป็นเวลาเริ่มต้นและสิ้นสุดของวันนี้
+                              final now = DateTime.now();
+                              _startDate = DateTime(now.year, now.month,
+                                  now.day, 0, 0, 0); // 00:00:00
+                              _endDate = DateTime(now.year, now.month, now.day,
+                                  23, 59, 59); // 23:59:59
                             });
                           },
                         ),

@@ -9,9 +9,11 @@ import 'package:shop_management_app/screens/member/member_list.dart';
 import 'package:shop_management_app/screens/product/product_list.dart';
 import 'package:shop_management_app/screens/sale/sale_form.dart';
 import 'package:shop_management_app/screens/sale/sale_history.dart';
+import 'package:shop_management_app/screens/data/import_export_screen.dart'; // เพิ่ม import
 import 'package:shop_management_app/services/member_service.dart';
 import 'package:shop_management_app/services/product_service.dart';
 import 'package:shop_management_app/services/sale_service.dart';
+import 'package:shop_management_app/services/data_service.dart';
 import 'package:shop_management_app/services/theme_provider.dart';
 
 void main() async {
@@ -31,6 +33,7 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context) => MemberService()),
         ChangeNotifierProvider(create: (context) => ProductService()),
         ChangeNotifierProvider(create: (context) => SaleService()),
+        ChangeNotifierProvider(create: (context) => DataService()),
         ChangeNotifierProvider(create: (context) => ThemeProvider()),
       ],
       child: Consumer<ThemeProvider>(
@@ -38,11 +41,10 @@ class MyApp extends StatelessWidget {
           return MaterialApp(
             title: 'KittaShop',
             theme: themeProvider.getTheme(),
-            // เพิ่มการรองรับ localization
             locale: const Locale('th', 'TH'),
             supportedLocales: const [
               Locale('th', 'TH'),
-              Locale('en', 'US'), // fallback
+              Locale('en', 'US'),
             ],
             localizationsDelegates: const [
               GlobalMaterialLocalizations.delegate,
@@ -56,6 +58,8 @@ class MyApp extends StatelessWidget {
               '/products': (context) => const ProductListScreen(),
               '/sales/new': (context) => const SaleFormScreen(),
               '/sales/history': (context) => const SaleHistoryScreen(),
+              '/data/import_export': (context) =>
+                  const ImportExportScreen(), // เพิ่ม route
             },
           );
         },
