@@ -1,3 +1,4 @@
+// lib/screens/member/member_detail.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -9,7 +10,7 @@ import 'package:shop_management_app/services/sale_service.dart';
 
 // หน้าจอแสดงรายละเอียดสมาชิก
 class MemberDetailScreen extends StatelessWidget {
-  final Member member;
+  final Member member; // ข้อมูลสมาชิกที่ต้องการแสดง
 
   const MemberDetailScreen({
     super.key,
@@ -18,28 +19,29 @@ class MemberDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ดึง SaleService เพื่อเข้าถึงข้อมูลการซื้อ
     final saleService = Provider.of<SaleService>(context);
 
     // ดึงรายการซื้อของสมาชิกนี้
     final memberSales = saleService.getSalesByMemberId(member.id ?? '');
 
-    // จัดรูปแบบวันที่
+    // ตั้งค่ารูปแบบวันที่และเงิน
     final dateFormat = DateFormat('d MMMM yyyy', 'th');
-
-    // จัดรูปแบบเงิน
     final currencyFormat = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
     return Scaffold(
+      // แถบด้านบน
       appBar: AppBar(
         title: const Text('รายละเอียดสมาชิก'),
         actions: [
-          // ปุ่มแก้ไข
+          // ปุ่มแก้ไขข้อมูลสมาชิก
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () => _showEditMemberDialog(context),
           ),
         ],
       ),
+      // เนื้อหาหลัก
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -53,7 +55,7 @@ class MemberDetailScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ส่วนหัวการ์ด
+                    // ส่วนหัว: ชื่อและคะแนน
                     Row(
                       children: [
                         CircleAvatar(
@@ -113,7 +115,7 @@ class MemberDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
 
-                    // เบอร์โทรศัพท์
+                    // เบอร์โทร
                     _buildInfoRow(
                       icon: Icons.phone,
                       label: 'เบอร์โทรศัพท์',
@@ -161,7 +163,7 @@ class MemberDetailScreen extends StatelessWidget {
               ),
             ),
 
-            // ประวัติการซื้อ
+            // ส่วนประวัติการซื้อ
             const Text(
               'ประวัติการซื้อ',
               style: TextStyle(
@@ -171,7 +173,7 @@ class MemberDetailScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // รายการประวัติการซื้อ
+            // แสดงรายการซื้อหรือข้อความถ้าไม่มี
             memberSales.isEmpty
                 ? const Card(
                     child: Padding(
@@ -196,7 +198,7 @@ class MemberDetailScreen extends StatelessWidget {
     );
   }
 
-  // สร้างแถวข้อมูล
+  // สร้างแถวข้อมูล เช่น เบอร์โทร, อีเมล
   Widget _buildInfoRow({
     required IconData icon,
     required String label,
@@ -229,12 +231,10 @@ class MemberDetailScreen extends StatelessWidget {
     );
   }
 
-  // สร้างรายการประวัติการซื้อ
+  // สร้างการ์ดแสดงรายการซื้อ
   Widget _buildSaleItem(BuildContext context, Sale sale) {
-    // จัดรูปแบบวันที่
+    // ตั้งค่ารูปแบบวันที่และเงิน
     final dateFormat = DateFormat('d MMM yyyy HH:mm', 'th');
-
-    // จัดรูปแบบเงิน
     final currencyFormat = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
     return Card(
@@ -244,10 +244,9 @@ class MemberDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ส่วนหัวรายการซื้อ
+            // ส่วนหัว: วันที่และยอดรวม
             Row(
               children: [
-                // วันที่ซื้อ
                 Expanded(
                   child: Text(
                     dateFormat.format(sale.saleDate),
@@ -256,7 +255,6 @@ class MemberDetailScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                // ยอดรวม
                 Text(
                   currencyFormat.format(sale.totalAmount),
                   style: const TextStyle(
@@ -267,7 +265,7 @@ class MemberDetailScreen extends StatelessWidget {
               ],
             ),
 
-            // แสดงรายละเอียดสินค้าที่ซื้อ
+            // รายการสินค้า
             const SizedBox(height: 8),
             ...sale.items.map((item) => Padding(
                   padding: const EdgeInsets.only(bottom: 4.0),
@@ -280,7 +278,7 @@ class MemberDetailScreen extends StatelessWidget {
                   ),
                 )),
 
-            // แสดงวิธีการชำระเงิน
+            // วิธีชำระเงิน
             const SizedBox(height: 8),
             Row(
               children: [
@@ -305,7 +303,7 @@ class MemberDetailScreen extends StatelessWidget {
     );
   }
 
-  // ไอคอนตามวิธีการชำระเงิน
+  // เลือกไอคอนตามวิธีชำระเงิน
   IconData _getPaymentIcon(String method) {
     switch (method.toLowerCase()) {
       case 'เงินสด':
@@ -319,7 +317,7 @@ class MemberDetailScreen extends StatelessWidget {
     }
   }
 
-  // แสดงไดอะล็อกแก้ไขสมาชิก
+  // แสดง Dialog สำหรับแก้ไขข้อมูลสมาชิก
   void _showEditMemberDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -327,11 +325,13 @@ class MemberDetailScreen extends StatelessWidget {
         child: MemberFormScreen(
           member: member,
           onSave: (Member updatedMember) async {
+            // อัปเดตข้อมูลสมาชิก
             final memberService =
                 Provider.of<MemberService>(context, listen: false);
             await memberService.updateMember(updatedMember);
             if (context.mounted) {
               Navigator.pop(context);
+              // แสดงข้อความสำเร็จ
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('อัปเดตข้อมูลเรียบร้อยแล้ว'),

@@ -1,11 +1,12 @@
+// lib/services/firebase_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-// คลาสสำหรับจัดการการเชื่อมต่อกับ Firebase
+// คลาสสำหรับจัดการการเชื่อมต่อกับ Firebase Firestore
 class FirebaseService {
-  // ตัวแปรสำหรับเชื่อมต่อกับ Firestore
+  // อินสแตนซ์สำหรับเชื่อมต่อ Firestore
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // ดึงข้อมูล Collection ทั้งหมด
+  // ดึงข้อมูล Collection ทั้งหมดแบบเรียลไทม์
   Stream<QuerySnapshot> getCollection(String collectionPath) {
     return _firestore.collection(collectionPath).snapshots();
   }
@@ -16,13 +17,13 @@ class FirebaseService {
     return _firestore.collection(collectionPath).doc(documentId).get();
   }
 
-  // สร้าง Document ใหม่
+  // เพิ่ม Document ใหม่
   Future<DocumentReference> addDocument(
       String collectionPath, Map<String, dynamic> data) {
     return _firestore.collection(collectionPath).add(data);
   }
 
-  // อัปเดต Document ที่มีอยู่
+  // อัปเดต Document
   Future<void> updateDocument(
       String collectionPath, String documentId, Map<String, dynamic> data) {
     return _firestore.collection(collectionPath).doc(documentId).update(data);

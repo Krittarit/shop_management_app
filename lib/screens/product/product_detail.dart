@@ -1,3 +1,4 @@
+// lib/screens/product/product_detail.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -8,7 +9,7 @@ import 'package:shop_management_app/services/product_service.dart';
 
 // หน้าจอแสดงรายละเอียดสินค้า
 class ProductDetailScreen extends StatelessWidget {
-  final Product product;
+  final Product product; // ข้อมูลสินค้าที่ต้องการแสดง
 
   const ProductDetailScreen({
     super.key,
@@ -17,26 +18,28 @@ class ProductDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // จัดรูปแบบเงิน
+    // ตั้งค่ารูปแบบเงิน
     final currencyFormat = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
     return Scaffold(
+      // แถบด้านบน
       appBar: AppBar(
         title: const Text('รายละเอียดสินค้า'),
         actions: [
-          // ปุ่มแก้ไข
+          // ปุ่มแก้ไขสินค้า
           IconButton(
             icon: const Icon(Icons.edit),
             onPressed: () => _showEditProductDialog(context),
           ),
         ],
       ),
+      // เนื้อหาหลัก
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // รูปภาพสินค้า
+            // รูปภาพสินค้า (ถ้ามี)
             if (product.imageUrl != null && product.imageUrl!.isNotEmpty)
               Center(
                 child: ClipRRect(
@@ -60,7 +63,7 @@ class ProductDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // ข้อมูลสินค้า
+            // การ์ดข้อมูลสินค้า
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -174,7 +177,7 @@ class ProductDetailScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // ปุ่มจัดการสต็อก
+            // การ์ดจัดการสต็อก
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -230,7 +233,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  // แสดงไดอะล็อกแก้ไขสินค้า
+  // แสดง Dialog สำหรับแก้ไขสินค้า
   void _showEditProductDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -238,12 +241,14 @@ class ProductDetailScreen extends StatelessWidget {
         child: ProductFormScreen(
           product: product,
           onSave: (Product updatedProduct, String? imageUrl) async {
+            // อัปเดตข้อมูลสินค้า
             final productService =
                 Provider.of<ProductService>(context, listen: false);
             await productService.updateProduct(updatedProduct,
                 imageUrl: imageUrl);
             if (context.mounted) {
               Navigator.pop(context);
+              // แสดงข้อความสำเร็จ
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
                   content: Text('อัปเดตสินค้าเรียบร้อยแล้ว'),
@@ -257,7 +262,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  // แสดงไดอะล็อกปรับจำนวนสต็อก
+  // แสดง Dialog สำหรับปรับสต็อก
   void _showAdjustStockDialog(BuildContext context, bool isAdd) {
     final TextEditingController amountController = TextEditingController();
 
@@ -305,9 +310,8 @@ class ProductDetailScreen extends StatelessWidget {
                 return;
               }
 
-              // ถ้าเป็นการลดสต็อก
+              // ตรวจสอบการลดสต็อก
               if (!isAdd) {
-                // ตรวจสอบว่าลดได้หรือไม่
                 if (amount > product.stock) {
                   if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -332,6 +336,7 @@ class ProductDetailScreen extends StatelessWidget {
 
               if (context.mounted) {
                 Navigator.pop(context);
+                // แสดงข้อความสำเร็จ
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     content: Text(isAdd

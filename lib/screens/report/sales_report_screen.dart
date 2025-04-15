@@ -1,3 +1,4 @@
+// lib/screens/report/sales_report_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -19,12 +20,13 @@ class _SalesReportScreenState extends State<SalesReportScreen>
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
   DateTime _endDate = DateTime.now();
 
-  // ตัวแปรสำหรับ TabController
+  // ตัวควบคุมแท็บ
   late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    // สร้าง TabController สำหรับ 3 แท็บ
     _tabController = TabController(length: 3, vsync: this);
   }
 
@@ -37,6 +39,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // แถบด้านบนพร้อมแท็บ
       appBar: AppBar(
         title: const Text('รายงานการขาย'),
         bottom: TabBar(
@@ -48,9 +51,10 @@ class _SalesReportScreenState extends State<SalesReportScreen>
           ],
         ),
       ),
+      // เนื้อหาหลัก
       body: Column(
         children: [
-          // ส่วนกรองข้อมูล
+          // ส่วนกรองวันที่
           Card(
             margin: const EdgeInsets.all(16),
             child: Padding(
@@ -68,7 +72,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      // ปุ่มเลือกวันที่เริ่มต้น
+                      // ช่องวันที่เริ่มต้น
                       Expanded(
                         child: InkWell(
                           onTap: () => _selectDate(context, true),
@@ -84,7 +88,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // ปุ่มเลือกวันที่สิ้นสุด
+                      // ช่องวันที่สิ้นสุด
                       Expanded(
                         child: InkWell(
                           onTap: () => _selectDate(context, false),
@@ -102,7 +106,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // ปุ่มตัวกรองด่วน
+                  // ปุ่มกรองด่วน
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -168,13 +172,8 @@ class _SalesReportScreenState extends State<SalesReportScreen>
             child: TabBarView(
               controller: _tabController,
               children: [
-                // แท็บที่ 1: รายงานรายวัน
                 _buildDailyReportTab(),
-
-                // แท็บที่ 2: รายงานรายเดือน
                 _buildMonthlyReportTab(),
-
-                // แท็บที่ 3: สินค้าขายดี
                 _buildTopProductsTab(),
               ],
             ),
@@ -184,7 +183,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
     );
   }
 
-  // สร้าง Widget ตัวกรองแบบชิพ
+  // สร้างปุ่มกรองด่วน
   Widget _buildFilterChip(
       {required String label, required VoidCallback onTap}) {
     return Padding(
@@ -196,7 +195,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
     );
   }
 
-  // แสดงไดอะล็อกเลือกวันที่
+  // เปิด DatePicker สำหรับเลือกวันที่
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final initialDate = isStartDate ? _startDate : _endDate;
     final DateTime? picked = await showDatePicker(
@@ -217,13 +216,11 @@ class _SalesReportScreenState extends State<SalesReportScreen>
       setState(() {
         if (isStartDate) {
           _startDate = picked;
-          // ถ้าวันที่เริ่มต้นมากกว่าวันที่สิ้นสุด ให้ปรับวันที่สิ้นสุดด้วย
           if (_startDate.isAfter(_endDate)) {
             _endDate = _startDate;
           }
         } else {
           _endDate = picked;
-          // ถ้าวันที่สิ้นสุดน้อยกว่าวันที่เริ่มต้น ให้ปรับวันที่เริ่มต้นด้วย
           if (_endDate.isBefore(_startDate)) {
             _startDate = _endDate;
           }
@@ -232,11 +229,11 @@ class _SalesReportScreenState extends State<SalesReportScreen>
     }
   }
 
-  // สร้างแท็บรายงานรายวัน
+  // สร้างแท็บรายวัน
   Widget _buildDailyReportTab() {
     return Consumer<SaleService>(
       builder: (context, saleService, child) {
-        // กรองข้อมูลตามช่วงวันที่
+        // ดึงข้อมูลการขายในช่วงวันที่
         final filteredSales =
             saleService.getSalesByDateRange(_startDate, _endDate);
 
@@ -248,10 +245,10 @@ class _SalesReportScreenState extends State<SalesReportScreen>
           return SalesData(entry.key, entry.value);
         }).toList();
 
-        // เรียงข้อมูลตามวันที่
+        // เรียงตามวันที่
         dailyData.sort((a, b) => a.date.compareTo(b.date));
 
-        // จัดรูปแบบเงิน
+        // ตั้งค่ารูปแบบเงิน
         final currencyFormat =
             NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
@@ -266,7 +263,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // การ์ดสรุปภาพรวม
+              // สรุปภาพรวม
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -318,7 +315,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
               ),
               const SizedBox(height: 16),
 
-              // กราฟแสดงยอดขายรายวัน
+              // กราฟยอดขายรายวัน
               Expanded(
                 child: Card(
                   child: Padding(
@@ -414,11 +411,11 @@ class _SalesReportScreenState extends State<SalesReportScreen>
     );
   }
 
-  // สร้างแท็บรายงานรายเดือน
+  // สร้างแท็บรายเดือน
   Widget _buildMonthlyReportTab() {
     return Consumer<SaleService>(
       builder: (context, saleService, child) {
-        // กรองข้อมูลตามช่วงวันที่
+        // ดึงข้อมูลการขาย
         final filteredSales =
             saleService.getSalesByDateRange(_startDate, _endDate);
 
@@ -430,10 +427,10 @@ class _SalesReportScreenState extends State<SalesReportScreen>
           return MonthlySalesData(entry.key, entry.value);
         }).toList();
 
-        // เรียงข้อมูลตามเดือน
+        // เรียงตามเดือน
         monthlyData.sort((a, b) => a.yearMonth.compareTo(b.yearMonth));
 
-        // จัดรูปแบบเงิน
+        // ตั้งค่ารูปแบบเงิน
         final currencyFormat =
             NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
@@ -448,7 +445,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // การ์ดสรุปภาพรวม
+              // สรุปภาพรวม
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -501,7 +498,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
               ),
               const SizedBox(height: 16),
 
-              // กราฟแสดงยอดขายรายเดือน
+              // กราฟยอดขายรายเดือน
               Expanded(
                 child: Card(
                   child: Padding(
@@ -614,14 +611,14 @@ class _SalesReportScreenState extends State<SalesReportScreen>
   Widget _buildTopProductsTab() {
     return Consumer<SaleService>(
       builder: (context, saleService, child) {
-        // กรองข้อมูลตามช่วงวันที่
+        // ดึงข้อมูลการขาย
         final filteredSales =
             saleService.getSalesByDateRange(_startDate, _endDate);
 
-        // หาสินค้าขายดี
+        // คำนวณสินค้าขายดี
         final topProducts = _getTopProducts(filteredSales);
 
-        // จัดรูปแบบเงิน
+        // ตั้งค่ารูปแบบเงิน
         final currencyFormat =
             NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
@@ -645,7 +642,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
               ),
               const SizedBox(height: 16),
 
-              // กราฟแท่งแสดงสินค้าขายดี
+              // กราฟแท่งสินค้าขายดี
               SizedBox(
                 height: 300,
                 child: BarChart(
@@ -758,12 +755,11 @@ class _SalesReportScreenState extends State<SalesReportScreen>
     );
   }
 
-  // ฟังก์ชันรวมยอดขายตามวัน
+  // รวมยอดขายตามวัน
   Map<DateTime, double> _groupSalesByDay(List<Sale> sales) {
     final dailySales = <DateTime, double>{};
 
     for (final sale in sales) {
-      // แปลงวันที่ให้เป็นวันที่อย่างเดียว (ไม่มีเวลา)
       final saleDate = DateTime(
         sale.saleDate.year,
         sale.saleDate.month,
@@ -780,12 +776,11 @@ class _SalesReportScreenState extends State<SalesReportScreen>
     return dailySales;
   }
 
-  // ฟังก์ชันรวมยอดขายตามเดือน
+  // รวมยอดขายตามเดือน
   Map<String, double> _groupSalesByMonth(List<Sale> sales) {
     final monthlySales = <String, double>{};
 
     for (final sale in sales) {
-      // สร้างคีย์ในรูปแบบ "YYYY-MM"
       final yearMonth =
           '${sale.saleDate.year}-${sale.saleDate.month.toString().padLeft(2, '0')}';
 
@@ -799,7 +794,7 @@ class _SalesReportScreenState extends State<SalesReportScreen>
     return monthlySales;
   }
 
-  // ฟังก์ชันหาสินค้าขายดี
+  // คำนวณสินค้าขายดี
   List<ProductSalesData> _getTopProducts(List<Sale> sales) {
     final productSales = <String, ProductSalesData>{};
 
@@ -820,24 +815,23 @@ class _SalesReportScreenState extends State<SalesReportScreen>
     }
 
     final result = productSales.values.toList();
-    // เรียงลำดับตามจำนวนที่ขายได้ (มากไปน้อย)
     result.sort((a, b) => b.quantity.compareTo(a.quantity));
 
     return result;
   }
 
-  // คำนวณยอดรวมของข้อมูลรายวัน
+  // คำนวณยอดรวมรายวัน
   double _calculateTotal(List<SalesData> data) {
     return data.fold(0, (sum, item) => sum + item.amount);
   }
 
-  // คำนวณยอดรวมของข้อมูลรายเดือน
+  // คำนวณยอดรวมรายเดือน
   double _calculateMonthlyTotal(List<MonthlySalesData> data) {
     return data.fold(0, (sum, item) => sum + item.amount);
   }
 }
 
-// คลาสเก็บข้อมูลยอดขายรายวัน
+// คลาสสำหรับยอดขายรายวัน
 class SalesData {
   final DateTime date;
   final double amount;
@@ -845,7 +839,7 @@ class SalesData {
   SalesData(this.date, this.amount);
 }
 
-// คลาสเก็บข้อมูลยอดขายรายเดือน
+// คลาสสำหรับยอดขายรายเดือน
 class MonthlySalesData {
   final String yearMonth;
   final double amount;
@@ -853,7 +847,7 @@ class MonthlySalesData {
   MonthlySalesData(this.yearMonth, this.amount);
 }
 
-// คลาสเก็บข้อมูลยอดขายของสินค้า
+// คลาสสำหรับสินค้าขายดี
 class ProductSalesData {
   final String productId;
   final String productName;

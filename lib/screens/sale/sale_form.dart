@@ -1,3 +1,4 @@
+// lib/screens/sale/sale_form.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -18,16 +19,16 @@ class SaleFormScreen extends StatefulWidget {
 }
 
 class _SaleFormScreenState extends State<SaleFormScreen> {
-  // ข้อมูลสมาชิก (ถ้ามี)
+  // สมาชิกที่เลือก (ถ้ามี)
   Member? _selectedMember;
 
-  // วิธีการชำระเงิน
+  // วิธีชำระเงิน (ค่าเริ่มต้น: เงินสด)
   String _paymentMethod = 'เงินสด';
 
-  // ตัวเลือกวิธีการชำระเงิน
+  // ตัวเลือกวิธีชำระเงิน
   final List<String> _paymentMethods = ['เงินสด', 'โอนเงิน', 'บัตรเครดิต'];
 
-  // ตัวควบคุมการค้นหาสมาชิก
+  // ตัวควบคุมช่องค้นหาสมาชิก
   final TextEditingController _memberSearchController = TextEditingController();
 
   @override
@@ -38,25 +39,26 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // เรียกใช้ services ผ่าน Provider
+    // ดึง Services
     final saleService = Provider.of<SaleService>(context);
     final productService = Provider.of<ProductService>(context);
     final memberService = Provider.of<MemberService>(context);
 
-    // รายการสินค้าที่กำลังจะขาย
+    // ดึงรายการสินค้าในตะกร้า
     final currentSaleItems = saleService.currentSaleItems;
 
     // คำนวณยอดรวม
     final totalAmount = saleService.calculateTotal();
 
-    // จัดรูปแบบเงิน
+    // ตั้งค่ารูปแบบเงิน
     final currencyFormat = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
     return Scaffold(
+      // แถบด้านบน
       appBar: AppBar(
         title: const Text('บันทึกการขาย'),
         actions: [
-          // ปุ่มล้างรายการ
+          // ปุ่มล้างตะกร้า
           IconButton(
             icon: const Icon(Icons.delete_sweep),
             onPressed: currentSaleItems.isEmpty
@@ -65,6 +67,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
           ),
         ],
       ),
+      // เนื้อหาหลัก
       body: Column(
         children: [
           // ส่วนเลือกสมาชิก
@@ -84,7 +87,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                   ),
                   const SizedBox(height: 8),
 
-                  // ถ้ามีการเลือกสมาชิกแล้ว
+                  // ถ้ามีสมาชิกเลือกแล้ว
                   if (_selectedMember != null) ...[
                     Row(
                       children: [
@@ -126,7 +129,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                             ],
                           ),
                         ),
-                        // ปุ่มยกเลิกการเลือกสมาชิก
+                        // ปุ่มยกเลิกการเลือก
                         IconButton(
                           icon: const Icon(Icons.close),
                           onPressed: () {
@@ -139,11 +142,11 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                       ],
                     ),
                   ]
-                  // ถ้ายังไม่ได้เลือกสมาชิก
+                  // ถ้ายังไม่ได้เลือก
                   else ...[
                     Row(
                       children: [
-                        // ช่องค้นหาสมาชิก
+                        // ช่องค้นหา
                         Expanded(
                           child: TextField(
                             controller: _memberSearchController,
@@ -186,7 +189,6 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                     Center(
                       child: TextButton(
                         onPressed: () {
-                          // ขายให้ลูกค้าทั่วไป (ไม่ใช่สมาชิก)
                           setState(() {
                             _selectedMember = null;
                             _memberSearchController.clear();
@@ -231,7 +233,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
             ),
           ),
 
-          // รายการสินค้าที่กำลังจะขาย
+          // รายการสินค้าในตะกร้า
           Expanded(
             child: currentSaleItems.isEmpty
                 ? const Center(
@@ -260,7 +262,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                                       }
                                     : null,
                               ),
-                              // แสดงจำนวน
+                              // จำนวน
                               Text(
                                 '${item.quantity}',
                                 style: const TextStyle(fontSize: 16),
@@ -269,7 +271,6 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                               IconButton(
                                 icon: const Icon(Icons.add_circle_outline),
                                 onPressed: () {
-                                  // ตรวจสอบสต็อกสินค้า
                                   if (productService.hasEnoughStock(
                                       item.productId, item.quantity + 1)) {
                                     saleService.updateItemQuantity(
@@ -284,7 +285,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                                   }
                                 },
                               ),
-                              // ปุ่มลบรายการ
+                              // ปุ่มลบ
                               IconButton(
                                 icon:
                                     const Icon(Icons.delete, color: Colors.red),
@@ -308,7 +309,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                 padding: const EdgeInsets.all(16),
                 child: Column(
                   children: [
-                    // แสดงยอดรวม
+                    // ยอดรวม
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -331,7 +332,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // เลือกวิธีการชำระเงิน
+                    // เลือกวิธีชำระเงิน
                     DropdownButtonFormField<String>(
                       decoration: const InputDecoration(
                         labelText: 'วิธีการชำระเงิน',
@@ -354,7 +355,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    // ปุ่มบันทึกการขาย
+                    // ปุ่มบันทึก
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -379,16 +380,16 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
     );
   }
 
-  // แสดงไดอะล็อกเพิ่มสินค้า
+  // แสดง Dialog เลือกสินค้า
   void _showAddProductDialog(BuildContext context) {
     final productService = Provider.of<ProductService>(context, listen: false);
     final saleService = Provider.of<SaleService>(context, listen: false);
     final products = productService.products.where((p) => p.stock > 0).toList();
 
-    // จัดรูปแบบเงิน
+    // ตั้งค่ารูปแบบเงิน
     final currencyFormat = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
-    // กรณีไม่มีสินค้าในคลัง
+    // ถ้าไม่มีสินค้า
     if (products.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -461,7 +462,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
     );
   }
 
-  // แสดงไดอะล็อกเลือกจำนวนสินค้า
+  // แสดง Dialog ระบุจำนวนสินค้า
   void _showQuantityDialog(BuildContext context, Product product) {
     final TextEditingController quantityController =
         TextEditingController(text: '1');
@@ -494,6 +495,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
             onPressed: () {
               final quantity = int.tryParse(quantityController.text) ?? 0;
 
+              // ตรวจสอบจำนวน
               if (quantity <= 0) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
@@ -504,7 +506,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                 return;
               }
 
-              // ตรวจสอบสต็อกสินค้า
+              // ตรวจสอบสต็อก
               final productService =
                   Provider.of<ProductService>(context, listen: false);
               if (!productService.hasEnoughStock(product.id!, quantity)) {
@@ -517,7 +519,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                 return;
               }
 
-              // เพิ่มสินค้าในรายการขาย
+              // เพิ่มสินค้าลงตะกร้า
               final saleService =
                   Provider.of<SaleService>(context, listen: false);
               saleService.addItemToCurrentSale(
@@ -529,11 +531,11 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                 ),
               );
 
-              // ปิดไดอะล็อกทั้งสอง
-              Navigator.pop(context); // ปิดไดอะล็อกจำนวน
-              Navigator.pop(context); // ปิดไดอะล็อกเลือกสินค้า
+              // ปิด Dialog
+              Navigator.pop(context);
+              Navigator.pop(context);
 
-              // แสดงข้อความ
+              // แสดงข้อความสำเร็จ
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text('เพิ่ม ${product.name} จำนวน $quantity ชิ้น'),
@@ -548,7 +550,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
     );
   }
 
-  // แสดงไดอะล็อกล้างรายการ
+  // แสดง Dialog ล้างตะกร้า
   void _showClearCartDialog(BuildContext context, SaleService saleService) {
     showDialog(
       context: context,
@@ -585,7 +587,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
     final productService = Provider.of<ProductService>(context, listen: false);
     final memberService = Provider.of<MemberService>(context, listen: false);
 
-    // ตรวจสอบว่ามีรายการสินค้าหรือไม่
+    // ตรวจสอบว่ามีสินค้า
     if (saleService.currentSaleItems.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -596,7 +598,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
       return;
     }
 
-    // ตรวจสอบสต็อกสินค้าอีกครั้ง
+    // ตรวจสอบสต็อก
     for (var item in saleService.currentSaleItems) {
       if (!productService.hasEnoughStock(item.productId, item.quantity)) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -619,7 +621,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
       paymentMethod: _paymentMethod,
     );
 
-    // แสดงไดอะล็อกยืนยันการบันทึก
+    // แสดง Dialog ยืนยัน
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -632,10 +634,9 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
           ),
           TextButton(
             onPressed: () async {
-              // ปิดไดอะล็อก
               Navigator.pop(context);
 
-              // แสดงไดอะล็อกกำลังบันทึก
+              // แสดง Dialog กำลังบันทึก
               showDialog(
                 context: context,
                 barrierDismissible: false,
@@ -655,10 +656,9 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                 await saleService.saveSale(sale, productService, memberService);
 
                 if (context.mounted) {
-                  // ปิดไดอะล็อกกำลังบันทึก
                   Navigator.pop(context);
 
-                  // แสดงไดอะล็อกบันทึกสำเร็จ
+                  // แสดง Dialog สำเร็จ
                   showDialog(
                     context: context,
                     barrierDismissible: false,
@@ -687,7 +687,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                         TextButton(
                           onPressed: () {
                             Navigator.pop(context);
-                            // ล้างข้อมูลการขาย
+                            // ล้างข้อมูล
                             setState(() {
                               _selectedMember = null;
                               _memberSearchController.clear();
@@ -702,10 +702,7 @@ class _SaleFormScreenState extends State<SaleFormScreen> {
                 }
               } catch (e) {
                 if (context.mounted) {
-                  // ปิดไดอะล็อกกำลังบันทึก
                   Navigator.pop(context);
-
-                  // แสดงข้อความผิดพลาด
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('เกิดข้อผิดพลาด: $e'),

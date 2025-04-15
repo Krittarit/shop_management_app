@@ -1,3 +1,4 @@
+// lib/screens/product/product_list.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
@@ -16,13 +17,13 @@ class ProductListScreen extends StatefulWidget {
 }
 
 class _ProductListScreenState extends State<ProductListScreen> {
-  String _searchQuery = '';
-  String? _selectedCategory;
+  String _searchQuery = ''; // คำค้นหา
+  String? _selectedCategory; // หมวดหมู่ที่เลือก
 
   @override
   void initState() {
     super.initState();
-    // เช็คว่ามีการส่งพารามิเตอร์มาให้แสดงไดอะล็อกเพิ่มสินค้าหรือไม่
+    // ตรวจสอบพารามิเตอร์เพื่อแสดง Dialog เพิ่มสินค้า
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final Map<String, dynamic>? args =
           ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
@@ -34,10 +35,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ดึง ProductService
     final productService = Provider.of<ProductService>(context);
     List<Product> products = productService.products;
 
-    // กรองตามหมวดหมู่ (ถ้ามีการเลือก)
+    // กรองตามหมวดหมู่
     if (_selectedCategory != null) {
       products = products
           .where((product) => product.category == _selectedCategory)
@@ -54,13 +56,14 @@ class _ProductListScreenState extends State<ProductListScreen> {
       }).toList();
     }
 
-    // รายการหมวดหมู่ทั้งหมด
+    // ดึงรายการหมวดหมู่
     final categories = productService.getAllCategories();
 
-    // จัดรูปแบบเงิน
+    // ตั้งค่ารูปแบบเงิน
     final currencyFormat = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
     return Scaffold(
+      // แถบด้านบน
       appBar: AppBar(
         title: const Text('จัดการสินค้า'),
         actions: [
@@ -80,9 +83,10 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
         ],
       ),
+      // เนื้อหาหลัก
       body: Column(
         children: [
-          // ช่องค้นหาและตัวกรองหมวดหมู่
+          // ช่องค้นหาและตัวกรอง
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -167,13 +171,13 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // สร้างรายการแสดงข้อมูลสินค้า
+  // สร้างรายการสินค้า
   Widget _buildProductListItem(
       BuildContext context, Product product, NumberFormat currencyFormat) {
     final productService = Provider.of<ProductService>(context, listen: false);
 
     return Slidable(
-      // ปุ่มลูกศรซ้าย (แก้ไข)
+      // ปุ่มเลื่อนซ้าย (แก้ไข)
       startActionPane: ActionPane(
         motion: const ScrollMotion(),
         children: [
@@ -186,7 +190,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
           ),
         ],
       ),
-      // ปุ่มลูกศรขวา (ลบ)
+      // ปุ่มเลื่อนขวา (ลบ)
       endActionPane: ActionPane(
         motion: const ScrollMotion(),
         children: [
@@ -204,7 +208,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
         child: ListTile(
           contentPadding: const EdgeInsets.all(8),
-          // รูปภาพสินค้า (ถ้ามี)
+          // รูปภาพสินค้า
           leading: Container(
             width: 60,
             height: 60,
@@ -227,12 +231,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   )
                 : const Icon(Icons.inventory),
           ),
-          // ชื่อสินค้าและรายละเอียด
+          // ชื่อและข้อมูล
           title: Text(product.name),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // ราคา
               Text(
                 currencyFormat.format(product.price),
                 style: const TextStyle(
@@ -240,7 +243,6 @@ class _ProductListScreenState extends State<ProductListScreen> {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              // หมวดหมู่
               Text(
                 'หมวดหมู่: ${product.category}',
                 style: TextStyle(
@@ -250,7 +252,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
               ),
             ],
           ),
-          // จำนวนสินค้าในคลัง
+          // จำนวนสต็อก
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -277,7 +279,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // นำทางไปยังหน้ารายละเอียดสินค้า
+  // นำทางไปหน้ารายละเอียดสินค้า
   void _navigateToProductDetail(Product product) {
     Navigator.push(
       context,
@@ -287,7 +289,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // แสดงไดอะล็อกเพิ่มสินค้า
+  // แสดง Dialog เพิ่มสินค้า
   void _showAddProductDialog() {
     showDialog(
       context: context,
@@ -312,7 +314,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // แสดงไดอะล็อกแก้ไขสินค้า
+  // แสดง Dialog แก้ไขสินค้า
   void _showEditProductDialog(Product product) {
     showDialog(
       context: context,
@@ -339,7 +341,7 @@ class _ProductListScreenState extends State<ProductListScreen> {
     );
   }
 
-  // แสดงไดอะล็อกลบสินค้า
+  // แสดง Dialog ลบสินค้า
   void _showDeleteProductDialog(Product product) {
     showDialog(
       context: context,

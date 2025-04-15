@@ -1,3 +1,4 @@
+// lib/screens/dashboard_screen.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -7,19 +8,19 @@ import 'package:shop_management_app/services/sale_service.dart';
 import 'package:shop_management_app/services/theme_provider.dart';
 import 'package:shop_management_app/widgets/custom_drawer.dart';
 
+// หน้าจอหลักของแอป
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    // เรียกใช้ services ผ่าน Provider
+    // ดึง Services จาก Provider
     final memberService = Provider.of<MemberService>(context);
     final productService = Provider.of<ProductService>(context);
     final saleService = Provider.of<SaleService>(context);
-    final themeProvider =
-        Provider.of<ThemeProvider>(context); // ดึง ThemeProvider
+    final themeProvider = Provider.of<ThemeProvider>(context);
 
-    // รูปแบบการแสดงเงิน
+    // ตั้งค่ารูปแบบเงินเป็นสกุลบาท
     final currencyFormat = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
     // คำนวณยอดขายวันนี้
@@ -27,26 +28,27 @@ class DashboardScreen extends StatelessWidget {
       DateTime.now().subtract(const Duration(days: 1)),
       DateTime.now(),
     );
-
     final todayTotal = saleService.calculateTotalSales(todaySales);
 
     return Scaffold(
+      // แถบด้านบนของหน้าจอ
       appBar: AppBar(
         title: const Text('หน้าหลัก'),
       ),
+      // เมนูนำทางด้านข้าง
       drawer: CustomDrawer(
-        currentTheme: themeProvider.currentTheme, // ส่ง theme ปัจจุบัน
+        currentTheme: themeProvider.currentTheme, // ส่ง Theme ปัจจุบัน
         onThemeChanged: (theme) {
-          // ส่ง callback สำหรับเปลี่ยน theme
-          themeProvider.setTheme(theme);
+          themeProvider.setTheme(theme); // เปลี่ยน Theme
         },
       ),
+      // ส่วนเนื้อหาหลัก
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ส่วนหัวหน้าจอหลัก
+            // การ์ดต้อนรับmoรับผู้ใช้
             Card(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -94,7 +96,7 @@ class DashboardScreen extends StatelessWidget {
             ),
             const SizedBox(height: 8),
 
-            // ข้อมูลสรุป (Dashboard)
+            // การ์ดแสดงข้อมูลสรุป
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
@@ -103,7 +105,7 @@ class DashboardScreen extends StatelessWidget {
               crossAxisSpacing: 10,
               mainAxisSpacing: 10,
               children: [
-                // จำนวนสมาชิก
+                // การ์ดจำนวนสมาชิก
                 _buildDashboardCard(
                   context,
                   title: 'สมาชิกทั้งหมด',
@@ -112,8 +114,7 @@ class DashboardScreen extends StatelessWidget {
                   color: Colors.blue,
                   onTap: () => Navigator.pushNamed(context, '/members'),
                 ),
-
-                // จำนวนสินค้า
+                // การ์ดจำนวนสินค้า
                 _buildDashboardCard(
                   context,
                   title: 'สินค้าทั้งหมด',
@@ -122,8 +123,7 @@ class DashboardScreen extends StatelessWidget {
                   color: Colors.green,
                   onTap: () => Navigator.pushNamed(context, '/products'),
                 ),
-
-                // ยอดขายวันนี้
+                // การ์ดยอดขายวันนี้
                 _buildDashboardCard(
                   context,
                   title: 'ยอดขายวันนี้',
@@ -132,8 +132,7 @@ class DashboardScreen extends StatelessWidget {
                   color: Colors.orange,
                   onTap: () => Navigator.pushNamed(context, '/sales/history'),
                 ),
-
-                // จำนวนการขายวันนี้
+                // การ์ดจำนวนการขายวันนี้
                 _buildDashboardCard(
                   context,
                   title: 'การขายวันนี้',
@@ -147,7 +146,7 @@ class DashboardScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // ปุ่มด่วน (Quick Actions)
+            // ส่วนการดำเนินการด่วน
             const Text(
               'การดำเนินการด่วน',
               style: TextStyle(
@@ -174,9 +173,7 @@ class DashboardScreen extends StatelessWidget {
                       trailing: const Icon(Icons.arrow_forward_ios),
                       onTap: () => Navigator.pushNamed(context, '/sales/new'),
                     ),
-
                     const Divider(),
-
                     // ปุ่มเพิ่มสมาชิกใหม่
                     ListTile(
                       leading: const CircleAvatar(
@@ -189,12 +186,12 @@ class DashboardScreen extends StatelessWidget {
                       onTap: () => Navigator.pushNamed(
                         context,
                         '/members',
-                        arguments: {'showAddDialog': true},
+                        arguments: {
+                          'showAddDialog': true
+                        }, // ส่งคำสั่งให้แสดง Dialog
                       ),
                     ),
-
                     const Divider(),
-
                     // ปุ่มเพิ่มสินค้าใหม่
                     ListTile(
                       leading: const CircleAvatar(
@@ -207,7 +204,9 @@ class DashboardScreen extends StatelessWidget {
                       onTap: () => Navigator.pushNamed(
                         context,
                         '/products',
-                        arguments: {'showAddDialog': true},
+                        arguments: {
+                          'showAddDialog': true
+                        }, // ส่งคำสั่งให้แสดง Dialog
                       ),
                     ),
                   ],
@@ -220,7 +219,7 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  // สร้างการ์ดแสดงข้อมูลบน Dashboard
+  // ฟังก์ชันสร้างการ์ดแสดงข้อมูลสรุป
   Widget _buildDashboardCard(
     BuildContext context, {
     required String title,
@@ -232,7 +231,7 @@ class DashboardScreen extends StatelessWidget {
     return Card(
       elevation: 4,
       child: InkWell(
-        onTap: onTap,
+        onTap: onTap, // นำทางเมื่อกด
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(

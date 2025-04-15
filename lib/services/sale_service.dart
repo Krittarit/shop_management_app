@@ -1,3 +1,4 @@
+// lib/services/sale_service.dart
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shop_management_app/models/sale.dart';
@@ -7,42 +8,42 @@ import 'package:shop_management_app/services/member_service.dart';
 
 // คลาสสำหรับจัดการข้อมูลการขาย
 class SaleService extends ChangeNotifier {
-  // ตัวแปรสำหรับเชื่อมต่อกับ Firebase
+  // อินสแตนซ์ FirebaseService
   final FirebaseService _firebaseService = FirebaseService();
 
-  // คอลเลกชันใน Firestore
+  // ชื่อ Collection ใน Firestore
   final String _collection = 'sales';
 
-  // รายการการขายทั้งหมด
+  // List สำหรับเก็บการขายทั้งหมด
   List<Sale> _sales = [];
 
-  // getter สำหรับดึงรายการการขาย
-  List<Sale> get sales => _sales;
-
-  // รายการสินค้าที่กำลังจะขาย (สำหรับหน้าบันทึกการขาย)
+  // List สำหรับเก็บตะกร้าสินค้าชั่วคราว
   List<SaleItem> _currentSaleItems = [];
 
-  // getter สำหรับดึงรายการสินค้าที่กำลังจะขาย
+  // Getter สำหรับการขาย
+  List<Sale> get sales => _sales;
+
+  // Getter สำหรับตะกร้า
   List<SaleItem> get currentSaleItems => _currentSaleItems;
 
-  // constructor
+  // Constructor
   SaleService() {
-    // ดึงข้อมูลการขายทั้งหมดเมื่อเริ่มต้น service
+    // ดึงข้อมูลการขายเมื่อเริ่มต้น
     _fetchSales();
   }
 
-  // ดึงข้อมูลการขายทั้งหมด
-  // ใน sale_service.dart
+  // ดึงข้อมูลการขายทั้งหมดแบบเรียลไทม์
   void _fetchSales() {
     try {
       _firebaseService.getCollection(_collection).listen((snapshot) {
         _sales = snapshot.docs.map((doc) {
           return Sale.fromMap(doc.data() as Map<String, dynamic>, doc.id);
         }).toList();
+        // เรียงจากใหม่ไปเก่า
         _sales.sort((a, b) => b.saleDate.compareTo(a.saleDate));
+        // แจ้งการเปลี่ยนแปลง
         notifyListeners();
       }, onError: (e) {
-        // แจ้ง error ผ่าน UI หรือ log
         print('Error fetching sales: $e');
       });
     } catch (e) {
@@ -59,14 +60,14 @@ class SaleService extends ChangeNotifier {
     return null;
   }
 
-  // เพิ่มสินค้าในรายการที่กำลังจะขาย
+  // เพิ่มสินค้าลงตะกร้า
   void addItemToCurrentSale(SaleItem item) {
-    // ตรวจสอบว่ามีสินค้านี้ในรายการหรือไม่
+    // ตรวจสอบว่ามีสินค้านี้ในตะกร้าแล้วหรือไม่
     int index =
         _currentSaleItems.indexWhere((i) => i.productId == item.productId);
 
     if (index != -1) {
-      // ถ้ามีแล้ว ให้เพิ่มจำนวน
+      // ถ้ามี เพิ่มจำนวน
       _currentSaleItems[index] = SaleItem(
         productId: item.productId,
         productName: item.productName,
@@ -74,14 +75,15 @@ class SaleService extends ChangeNotifier {
         quantity: _currentSaleItems[index].quantity + item.quantity,
       );
     } else {
-      // ถ้ายังไม่มี ให้เพิ่มในรายการ
+      // ถ้าไม่มี เพิ่มใหม่
       _currentSaleItems.add(item);
     }
 
+    // แจ้งการเปลี่ยนแปลง
     notifyListeners();
   }
 
-  // ลบสินค้าออกจากรายการที่กำลังจะขาย
+  // ลบสินค้าจากตะกร้า
   void removeItemFromCurrentSale(int index) {
     if (index >= 0 && index < _currentSaleItems.length) {
       _currentSaleItems.removeAt(index);
@@ -89,7 +91,7 @@ class SaleService extends ChangeNotifier {
     }
   }
 
-  // อัปเดตจำนวนสินค้าในรายการที่กำลังจะขาย
+  // อัปเดตจำนวนสินค้าในตะกร้า
   void updateItemQuantity(int index, int quantity) {
     if (index >= 0 && index < _currentSaleItems.length && quantity > 0) {
       _currentSaleItems[index] = SaleItem(
@@ -102,13 +104,13 @@ class SaleService extends ChangeNotifier {
     }
   }
 
-  // ล้างรายการสินค้าที่กำลังจะขาย
+  // ล้างตะกร้า
   void clearCurrentSale() {
     _currentSaleItems.clear();
     notifyListeners();
   }
 
-  // คำนวณยอดรวมของรายการที่กำลังจะขาย
+  // คำนวณยอดรวมตะกร้า
   double calculateTotal() {
     return _currentSaleItems.fold(0, (sum, item) => sum + item.total);
   }
@@ -120,23 +122,23 @@ class SaleService extends ChangeNotifier {
     final docRef =
         await _firebaseService.addDocument(_collection, sale.toMap());
 
-    // อัปเดตสต็อกสินค้า
+    // อัปเดตสต็อก
     for (var item in sale.items) {
       await productService.updateStock(item.productId, -item.quantity);
     }
 
-    // อัปเดตคะแนนสะสมของสมาชิก (ถ้ามี)
+    // อัปเดตคะแนนสมาชิก (ถ้ามี)
     if (sale.memberId != null) {
-      // สมมติให้ 1 บาท = 1 คะแนน
+      // 1 บาท = 1 คะแนน
       int points = sale.totalAmount.round();
       await memberService.updatePoints(sale.memberId!, points);
     }
 
-    // ล้างรายการสินค้าที่กำลังจะขาย
+    // ล้างตะกร้า
     clearCurrentSale();
   }
 
-  // ดึงรายการขายตามช่วงวันที่
+  // กรองการขายตามวันที่
   List<Sale> getSalesByDateRange(DateTime startDate, DateTime endDate) {
     return _sales.where((sale) {
       return sale.saleDate.isAfter(startDate) &&
@@ -144,12 +146,12 @@ class SaleService extends ChangeNotifier {
     }).toList();
   }
 
-  // ดึงรายการขายของสมาชิก
+  // กรองการขายตามสมาชิก
   List<Sale> getSalesByMemberId(String memberId) {
     return _sales.where((sale) => sale.memberId == memberId).toList();
   }
 
-  // คำนวณยอดขายทั้งหมด
+  // คำนวณยอดรวมการขาย
   double calculateTotalSales([List<Sale>? salesList]) {
     final list = salesList ?? _sales;
     return list.fold(0, (sum, sale) => sum + sale.totalAmount);

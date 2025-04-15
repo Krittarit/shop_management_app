@@ -1,3 +1,4 @@
+// lib/services/product_service.dart
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shop_management_app/models/product.dart';
@@ -5,25 +6,25 @@ import 'package:shop_management_app/services/firebase_service.dart';
 
 // คลาสสำหรับจัดการข้อมูลสินค้า
 class ProductService extends ChangeNotifier {
-  // ตัวแปรสำหรับเชื่อมต่อกับ Firebase
+  // อินสแตนซ์ FirebaseService
   final FirebaseService _firebaseService = FirebaseService();
 
-  // คอลเลกชันใน Firestore
+  // ชื่อ Collection ใน Firestore
   final String _collection = 'products';
 
-  // รายการสินค้าทั้งหมด
+  // List สำหรับเก็บสินค้าทั้งหมด
   List<Product> _products = [];
 
-  // getter สำหรับดึงรายการสินค้า
+  // Getter สำหรับดึงรายการสินค้า
   List<Product> get products => _products;
 
-  // constructor
+  // Constructor
   ProductService() {
-    // ดึงข้อมูลสินค้าทั้งหมดเมื่อเริ่มต้น service
+    // ดึงข้อมูลสินค้าเมื่อเริ่มต้น
     _fetchProducts();
   }
 
-  // ดึงข้อมูลสินค้าทั้งหมด
+  // ดึงข้อมูลสินค้าทั้งหมดแบบเรียลไทม์
   void _fetchProducts() {
     _firebaseService.getCollection(_collection).listen((snapshot) {
       _products = snapshot.docs.map((doc) {
@@ -33,7 +34,7 @@ class ProductService extends ChangeNotifier {
       // เรียงตามชื่อ
       _products.sort((a, b) => a.name.compareTo(b.name));
 
-      // แจ้งเตือนว่าข้อมูลมีการเปลี่ยนแปลง
+      // แจ้งการเปลี่ยนแปลง
       notifyListeners();
     });
   }
@@ -47,9 +48,9 @@ class ProductService extends ChangeNotifier {
     return null;
   }
 
-  // เพิ่มสินค้าใหม่ - รับ URL รูปภาพแทนไฟล์
+  // เพิ่มสินค้าใหม่
   Future<void> addProduct(Product product, {String? imageUrl}) async {
-    // หากมีการระบุ URL รูปภาพ ให้ใช้ URL นั้น
+    // รวม URL รูปภาพถ้ามี
     if (imageUrl != null && imageUrl.isNotEmpty) {
       product = product.copyWith(imageUrl: imageUrl);
     }
@@ -57,10 +58,10 @@ class ProductService extends ChangeNotifier {
     await _firebaseService.addDocument(_collection, product.toMap());
   }
 
-  // อัปเดตข้อมูลสินค้า - รับ URL รูปภาพใหม่แทนไฟล์
+  // อัปเดตข้อมูลสินค้า
   Future<void> updateProduct(Product product, {String? imageUrl}) async {
     if (product.id != null) {
-      // หากมีการระบุ URL รูปภาพใหม่ ให้อัปเดต
+      // รวม URL รูปภาพถ้ามี
       if (imageUrl != null && imageUrl.isNotEmpty) {
         product = product.copyWith(imageUrl: imageUrl);
       }
@@ -75,17 +76,17 @@ class ProductService extends ChangeNotifier {
     await _firebaseService.deleteDocument(_collection, id);
   }
 
-  // อัปเดตจำนวนสินค้าในคลัง
+  // อัปเดตสต็อกสินค้า
   Future<void> updateStock(String productId, int amount) async {
     final product = await getProduct(productId);
     if (product != null) {
       product.stock += amount;
-      if (product.stock < 0) product.stock = 0;
+      if (product.stock < 0) product.stock = 0; // ป้องกันสต็อกติดลบ
       await updateProduct(product);
     }
   }
 
-  // ดึงรายการสินค้าตามหมวดหมู่
+  // กรองสินค้าตามหมวดหมู่
   List<Product> getProductsByCategory(String category) {
     return _products.where((product) => product.category == category).toList();
   }
@@ -98,7 +99,7 @@ class ProductService extends ChangeNotifier {
     return categories;
   }
 
-  // ตรวจสอบว่ามีสินค้าเพียงพอหรือไม่
+  // ตรวจสอบสต็อกสินค้า
   bool hasEnoughStock(String productId, int quantity) {
     try {
       final product =

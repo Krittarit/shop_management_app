@@ -1,8 +1,10 @@
+// lib/screens/data/import_export_screen.dart
 import 'package:flutter/material.dart';
 import 'package:clipboard/clipboard.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_management_app/services/data_service.dart';
 
+// หน้าจอนำเข้าและส่งออกข้อมูล
 class ImportExportScreen extends StatefulWidget {
   const ImportExportScreen({super.key});
 
@@ -11,11 +13,14 @@ class ImportExportScreen extends StatefulWidget {
 }
 
 class _ImportExportScreenState extends State<ImportExportScreen> {
+  // ตัวควบคุมช่องข้อความสำหรับ JSON
   final _membersController = TextEditingController();
   final _productsController = TextEditingController();
   final _salesController = TextEditingController();
+  // ตัวแปรสถานะการโหลด
   bool _isLoading = false;
 
+  // ล้างทรัพยากรเมื่อปิดหน้าจอ
   @override
   void dispose() {
     _membersController.dispose();
@@ -24,6 +29,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     super.dispose();
   }
 
+  // แสดง Dialog ยืนยันการนำเข้า
   Future<bool> _confirmImport(BuildContext context) async {
     final confirm = await showDialog<bool>(
       context: context,
@@ -46,8 +52,10 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     return confirm ?? false;
   }
 
+  // ฟังก์ชันนำเข้าข้อมูล
   Future<void> _importData(String collection, TextEditingController controller,
       DataService dataService) async {
+    // ตรวจสอบว่า JSON ไม่ว่าง
     if (controller.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -56,18 +64,22 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       return;
     }
 
+    // ขอยืนยันจากผู้ใช้
     if (!await _confirmImport(context)) return;
 
+    // เริ่มโหลด
     setState(() {
       _isLoading = true;
     });
 
+    // นำเข้า JSON ลง Firestore
     final success =
         await dataService.importCollection(collection, controller.text);
     setState(() {
       _isLoading = false;
     });
 
+    // แสดงผลลัพธ์
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(success ? 'นำเข้าข้อมูลสำเร็จ' : 'นำเข้าข้อมูลล้มเหลว'),
@@ -75,16 +87,20 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       ),
     );
 
+    // ล้างช่องถ้าสำเร็จ
     if (success) {
       controller.clear();
     }
   }
 
+  // ฟังก์ชันส่งออกข้อมูล
   Future<void> _exportData(String collection, DataService dataService) async {
+    // เริ่มโหลด
     setState(() {
       _isLoading = true;
     });
 
+    // ดึง JSON ตามประเภทข้อมูล
     String json;
     switch (collection) {
       case 'members':
@@ -100,10 +116,12 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
         return;
     }
 
+    // หยุดโหลด
     setState(() {
       _isLoading = false;
     });
 
+    // คัดลอก JSON ไปยังคลิปบอร์ด
     await FlutterClipboard.copy(json);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
@@ -112,11 +130,13 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
     );
   }
 
+  // ฟังก์ชันวาง JSON จากคลิปบอร์ด
   Future<void> _pasteFromClipboard(TextEditingController controller) async {
     final text = await FlutterClipboard.paste();
     controller.text = text;
   }
 
+  // ฟังก์ชันสร้าง UI สำหรับแต่ละส่วน (สมาชิก, สินค้า, การขาย)
   Widget _buildSection(String title, TextEditingController controller,
       String collection, DataService dataService) {
     return Card(
@@ -132,6 +152,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
+            // ช่องสำหรับวาง JSON
             TextField(
               controller: controller,
               maxLines: 5,
@@ -146,6 +167,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
               ),
             ),
             const SizedBox(height: 12),
+            // ปุ่มนำเข้าและส่งออก
             Row(
               children: [
                 Expanded(
@@ -178,6 +200,7 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ดึง DataService จาก Provider
     final dataService = Provider.of<DataService>(context, listen: false);
 
     return Scaffold(
@@ -186,21 +209,26 @@ class _ImportExportScreenState extends State<ImportExportScreen> {
       ),
       body: Stack(
         children: [
+          // เนื้อหาหลัก
           SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // ส่วนสมาชิก
                 _buildSection(
                     'สมาชิก', _membersController, 'members', dataService),
                 const SizedBox(height: 16),
+                // ส่วนสินค้า
                 _buildSection(
                     'สินค้า', _productsController, 'products', dataService),
                 const SizedBox(height: 16),
+                // ส่วนการขาย
                 _buildSection('การขาย', _salesController, 'sales', dataService),
               ],
             ),
           ),
+          // แสดงตัวโหลดเมื่อกำลังทำงาน
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.5),

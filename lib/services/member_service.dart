@@ -1,3 +1,4 @@
+// lib/services/member_service.dart
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shop_management_app/models/member.dart';
@@ -5,25 +6,25 @@ import 'package:shop_management_app/services/firebase_service.dart';
 
 // คลาสสำหรับจัดการข้อมูลสมาชิก
 class MemberService extends ChangeNotifier {
-  // ตัวแปรสำหรับเชื่อมต่อกับ Firebase
+  // อินสแตนซ์ FirebaseService
   final FirebaseService _firebaseService = FirebaseService();
 
-  // คอลเลกชันใน Firestore
+  // ชื่อ Collection ใน Firestore
   final String _collection = 'members';
 
-  // รายการสมาชิกทั้งหมด
+  // List สำหรับเก็บสมาชิกทั้งหมด
   List<Member> _members = [];
 
-  // getter สำหรับดึงรายการสมาชิก
+  // Getter สำหรับดึงรายการสมาชิก
   List<Member> get members => _members;
 
-  // constructor
+  // Constructor
   MemberService() {
-    // ดึงข้อมูลสมาชิกทั้งหมดเมื่อเริ่มต้น service
+    // ดึงข้อมูลสมาชิกเมื่อเริ่มต้น
     _fetchMembers();
   }
 
-  // ดึงข้อมูลสมาชิกทั้งหมด
+  // ดึงข้อมูลสมาชิกทั้งหมดแบบเรียลไทม์
   void _fetchMembers() {
     _firebaseService.getCollection(_collection).listen((snapshot) {
       _members = snapshot.docs.map((doc) {
@@ -33,7 +34,7 @@ class MemberService extends ChangeNotifier {
       // เรียงตามชื่อ
       _members.sort((a, b) => a.name.compareTo(b.name));
 
-      // แจ้งเตือนว่าข้อมูลมีการเปลี่ยนแปลง
+      // แจ้งการเปลี่ยนแปลง
       notifyListeners();
     });
   }
@@ -74,7 +75,7 @@ class MemberService extends ChangeNotifier {
     }
   }
 
-  // ค้นหาสมาชิกจากเบอร์โทรศัพท์
+  // ค้นหาสมาชิกด้วยเบอร์โทร
   Member? findMemberByPhone(String phone) {
     try {
       return _members.firstWhere((member) => member.phone == phone);

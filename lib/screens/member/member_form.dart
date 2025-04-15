@@ -1,10 +1,11 @@
+// lib/screens/member/member_form.dart
 import 'package:flutter/material.dart';
 import 'package:shop_management_app/models/member.dart';
 
 // หน้าจอฟอร์มเพิ่ม/แก้ไขข้อมูลสมาชิก
 class MemberFormScreen extends StatefulWidget {
   final Member? member; // สมาชิกที่ต้องการแก้ไข (null = เพิ่มใหม่)
-  final Function(Member) onSave; // ฟังก์ชันที่จะทำงานเมื่อกดบันทึก
+  final Function(Member) onSave; // Callback เมื่อบันทึกข้อมูล
 
   const MemberFormScreen({
     super.key,
@@ -17,18 +18,18 @@ class MemberFormScreen extends StatefulWidget {
 }
 
 class _MemberFormScreenState extends State<MemberFormScreen> {
-  // ตัวแปรสำหรับฟอร์ม
+  // ตัวแปรสำหรับจัดการฟอร์ม
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _addressController = TextEditingController();
-  int _point = 0;
+  int _point = 0; // คะแนนสะสม (ใช้เมื่อแก้ไข)
 
   @override
   void initState() {
     super.initState();
-    // กรณีแก้ไขข้อมูล ให้ดึงข้อมูลเดิมมาแสดง
+    // ถ้าเป็นการแก้ไข นำข้อมูลเดิมมาแสดง
     if (widget.member != null) {
       _nameController.text = widget.member!.name;
       _phoneController.text = widget.member!.phone;
@@ -38,9 +39,9 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
     }
   }
 
+  // ล้างทรัพยากร
   @override
   void dispose() {
-    // คืนทรัพยากรเมื่อไม่ได้ใช้งาน
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
@@ -70,7 +71,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ช่องกรอกชื่อ-นามสกุล (บังคับกรอก)
+              // ช่องกรอกชื่อ-นามสกุล (บังคับ)
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -86,7 +87,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ช่องกรอกเบอร์โทรศัพท์ (บังคับกรอก)
+              // ช่องกรอกเบอร์โทรศัพท์ (บังคับ)
               TextFormField(
                 controller: _phoneController,
                 decoration: const InputDecoration(
@@ -125,7 +126,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
               ),
               const SizedBox(height: 12),
 
-              // แสดงคะแนนสะสม (กรณีแก้ไข)
+              // แสดงและจัดการคะแนนสะสม (เฉพาะการแก้ไข)
               if (widget.member != null) ...[
                 Row(
                   children: [
@@ -140,7 +141,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                       ),
                     ),
                     const Spacer(),
-                    // ปุ่มปรับคะแนน (-)
+                    // ปุ่มลดคะแนน
                     IconButton(
                       icon: const Icon(Icons.remove_circle),
                       onPressed: () {
@@ -149,7 +150,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
                         });
                       },
                     ),
-                    // ปุ่มปรับคะแนน (+)
+                    // ปุ่มเพิ่มคะแนน
                     IconButton(
                       icon: const Icon(Icons.add_circle),
                       onPressed: () {
@@ -189,13 +190,13 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
     );
   }
 
-  // บันทึกข้อมูลสมาชิก
+  // ฟังก์ชันบันทึกข้อมูลสมาชิก
   void _saveMember() {
     // ตรวจสอบความถูกต้องของฟอร์ม
     if (_formKey.currentState!.validate()) {
       final Member member;
 
-      // กรณีแก้ไขข้อมูล
+      // กรณีแก้ไข
       if (widget.member != null) {
         member = widget.member!.copyWith(
           name: _nameController.text.trim(),
@@ -225,7 +226,7 @@ class _MemberFormScreenState extends State<MemberFormScreen> {
         );
       }
 
-      // เรียกใช้ฟังก์ชันบันทึก
+      // ส่งข้อมูลไปบันทึก
       widget.onSave(member);
     }
   }

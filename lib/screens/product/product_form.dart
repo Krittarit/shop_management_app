@@ -1,3 +1,4 @@
+// lib/screens/product/product_form.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shop_management_app/models/product.dart';
@@ -7,7 +8,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 // หน้าจอฟอร์มเพิ่ม/แก้ไขข้อมูลสินค้า
 class ProductFormScreen extends StatefulWidget {
   final Product? product; // สินค้าที่ต้องการแก้ไข (null = เพิ่มใหม่)
-  final Function(Product, String?) onSave; // ฟังก์ชันที่จะทำงานเมื่อกดบันทึก
+  final Function(Product, String?) onSave; // Callback เมื่อบันทึกข้อมูล
 
   const ProductFormScreen({
     super.key,
@@ -20,20 +21,20 @@ class ProductFormScreen extends StatefulWidget {
 }
 
 class _ProductFormScreenState extends State<ProductFormScreen> {
-  // ตัวแปรสำหรับฟอร์ม
+  // ตัวแปรสำหรับจัดการฟอร์ม
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _priceController = TextEditingController();
   final _stockController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _imageUrlController = TextEditingController();
-  String _category = 'ทั่วไป';
-  bool _isValidImageUrl = true;
+  String _category = 'ทั่วไป'; // ค่าเริ่มต้นหมวดหมู่
+  bool _isValidImageUrl = true; // สถานะความถูกต้องของ URL
 
   @override
   void initState() {
     super.initState();
-    // กรณีแก้ไขข้อมูล ให้ดึงข้อมูลเดิมมาแสดง
+    // ถ้าเป็นการแก้ไข นำข้อมูลเดิมมาแสดง
     if (widget.product != null) {
       _nameController.text = widget.product!.name;
       _priceController.text = widget.product!.price.toString();
@@ -44,9 +45,9 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     }
   }
 
+  // ล้างทรัพยากร
   @override
   void dispose() {
-    // คืนทรัพยากรเมื่อไม่ได้ใช้งาน
     _nameController.dispose();
     _priceController.dispose();
     _stockController.dispose();
@@ -64,7 +65,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
       return;
     }
 
-    // ตรวจสอบว่า URL มีรูปแบบถูกต้องและเป็น URL ของรูปภาพหรือไม่
+    // ใช้ RegExp ตรวจสอบรูปแบบ URL รูปภาพ
     final pattern = RegExp(
       r'^(http|https):\/\/[^\s/$.?#].[^\s]*\.(jpg|jpeg|png|gif|bmp|webp)(\?.*)?$',
       caseSensitive: false,
@@ -77,16 +78,16 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ดึงรายการหมวดหมู่ทั้งหมดจาก Service
+    // ดึงรายการหมวดหมู่จาก ProductService
     final productService = Provider.of<ProductService>(context);
     final categories = productService.getAllCategories();
 
-    // ถ้าไม่มีหมวดหมู่ ให้ใช้หมวดหมู่ทั่วไป
+    // ถ้าไม่มีหมวดหมู่ ใช้ "ทั่วไป"
     if (categories.isEmpty) {
       categories.add('ทั่วไป');
     }
 
-    // ถ้าหมวดหมู่ไม่อยู่ในรายการ ให้เพิ่มเข้าไป
+    // ถ้าหมวดหมู่ไม่อยู่ในรายการ เพิ่มเข้าไป
     if (!categories.contains(_category)) {
       categories.add(_category);
     }
@@ -113,7 +114,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ส่วนป้อน URL รูปภาพและแสดงตัวอย่าง
+              // ช่องกรอก URL รูปภาพและตัวอย่าง
               Column(
                 children: [
                   TextFormField(
@@ -158,7 +159,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 16),
 
-              // ช่องกรอกชื่อสินค้า (บังคับกรอก)
+              // ช่องกรอกชื่อสินค้า (บังคับ)
               TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
@@ -174,7 +175,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ช่องกรอกราคา (บังคับกรอก)
+              // ช่องกรอกราคา (บังคับ)
               TextFormField(
                 controller: _priceController,
                 decoration: const InputDecoration(
@@ -197,7 +198,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 12),
 
-              // ช่องกรอกจำนวนในคลัง (บังคับกรอก)
+              // ช่องกรอกจำนวนในคลัง (บังคับ)
               TextFormField(
                 controller: _stockController,
                 decoration: const InputDecoration(
@@ -220,7 +221,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
               ),
               const SizedBox(height: 12),
 
-              // เลือกหมวดหมู่ (บังคับเลือก)
+              // เลือกหมวดหมู่ (บังคับ)
               DropdownButtonFormField<String>(
                 decoration: const InputDecoration(
                   labelText: 'หมวดหมู่ *',
@@ -280,13 +281,13 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
     );
   }
 
-  // บันทึกข้อมูลสินค้า
+  // ฟังก์ชันบันทึกข้อมูลสินค้า
   void _saveProduct() {
-    // ตรวจสอบความถูกต้องของฟอร์ม
+    // ตรวจสอบความถูกต้องของฟอร์มและ URL
     if (_formKey.currentState!.validate() && _isValidImageUrl) {
       final Product product;
 
-      // กรณีแก้ไขข้อมูล
+      // กรณีแก้ไข
       if (widget.product != null) {
         product = widget.product!.copyWith(
           name: _nameController.text.trim(),
@@ -311,7 +312,7 @@ class _ProductFormScreenState extends State<ProductFormScreen> {
         );
       }
 
-      // เรียกใช้ฟังก์ชันบันทึก พร้อม URL รูปภาพ (ถ้ามี)
+      // ส่งข้อมูลไปบันทึก
       String? imageUrl = _imageUrlController.text.trim().isEmpty
           ? null
           : _imageUrlController.text.trim();

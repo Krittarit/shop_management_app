@@ -1,10 +1,16 @@
+// lib/models/sale.dart
 // โมเดลข้อมูลรายการสินค้าในการขาย
 class SaleItem {
-  String productId; // รหัสสินค้า
-  String productName; // ชื่อสินค้า
-  double price; // ราคาต่อชิ้น
-  int quantity; // จำนวนที่ซื้อ
-  double get total => price * quantity; // ราคารวมของรายการนี้
+  // รหัสสินค้า
+  String productId;
+  // ชื่อสินค้า
+  String productName;
+  // ราคาต่อชิ้น
+  double price;
+  // จำนวนที่ซื้อ
+  int quantity;
+  // ราคารวมของรายการนี้ (คำนวณจาก price * quantity)
+  double get total => price * quantity;
 
   // Constructor
   SaleItem({
@@ -17,10 +23,10 @@ class SaleItem {
   // แปลงข้อมูลจาก Firestore มาเป็น Object
   factory SaleItem.fromMap(Map<String, dynamic> map) {
     return SaleItem(
-      productId: map['productId'] ?? '',
-      productName: map['productName'] ?? '',
-      price: (map['price'] ?? 0).toDouble(),
-      quantity: map['quantity'] ?? 0,
+      productId: map['productId'] ?? '', // ค่าเริ่มต้นถ้าไม่มี
+      productName: map['productName'] ?? '', // ค่าเริ่มต้นถ้าไม่มี
+      price: (map['price'] ?? 0).toDouble(), // แปลงเป็น double
+      quantity: map['quantity'] ?? 0, // ค่าเริ่มต้นถ้าไม่มี
     );
   }
 
@@ -31,20 +37,27 @@ class SaleItem {
       'productName': productName,
       'price': price,
       'quantity': quantity,
-      'total': total,
+      'total': total, // รวมราคารวมไว้ใน Map
     };
   }
 }
 
 // โมเดลข้อมูลการขาย
 class Sale {
-  String? id; // รหัสการขาย (ได้จาก Firestore)
-  DateTime saleDate; // วันที่ขาย
-  String? memberId; // รหัสสมาชิก (ถ้ามี)
-  String? memberName; // ชื่อสมาชิก (ถ้ามี)
-  List<SaleItem> items; // รายการสินค้าที่ขาย
-  double totalAmount; // ยอดรวมทั้งหมด
-  String paymentMethod; // วิธีการชำระเงิน (เงินสด, โอน, บัตรเครดิต)
+  // รหัสการขาย (ได้จาก Firestore)
+  String? id;
+  // วันที่ขาย
+  DateTime saleDate;
+  // รหัสสมาชิก (ถ้ามี)
+  String? memberId;
+  // ชื่อสมาชิก (ถ้ามี)
+  String? memberName;
+  // รายการสินค้าที่ขาย
+  List<SaleItem> items;
+  // ยอดรวมทั้งหมด
+  double totalAmount;
+  // วิธีการชำระเงิน (เงินสด, โอน, บัตรเครดิต)
+  String paymentMethod;
 
   // Constructor
   Sale({
@@ -59,6 +72,7 @@ class Sale {
 
   // แปลงข้อมูลจาก Firestore มาเป็น Object
   factory Sale.fromMap(Map<String, dynamic> map, String documentId) {
+    // สร้าง List ของ SaleItem จากข้อมูล items
     List<SaleItem> items = [];
     if (map['items'] != null) {
       for (var item in map['items']) {
@@ -67,23 +81,26 @@ class Sale {
     }
 
     return Sale(
-      id: documentId,
-      saleDate: map['saleDate']?.toDate() ?? DateTime.now(),
-      memberId: map['memberId'],
-      memberName: map['memberName'],
-      items: items,
-      totalAmount: (map['totalAmount'] ?? 0).toDouble(),
-      paymentMethod: map['paymentMethod'] ?? 'เงินสด',
+      id: documentId, // กำหนดรหัสจาก Firestore
+      saleDate: map['saleDate']?.toDate() ??
+          DateTime.now(), // แปลง Timestamp หรือใช้เวลาปัจจุบัน
+      memberId: map['memberId'], // อาจเป็น null
+      memberName: map['memberName'], // อาจเป็น null
+      items: items, // รายการสินค้า
+      totalAmount: (map['totalAmount'] ?? 0).toDouble(), // แปลงเป็น double
+      paymentMethod: map['paymentMethod'] ?? 'เงินสด', // ค่าเริ่มต้นถ้าไม่มี
     );
   }
 
   // แปลงข้อมูลจาก Object เป็นรูปแบบที่ Firestore ใช้ได้
   Map<String, dynamic> toMap() {
     return {
-      'saleDate': saleDate,
-      'memberId': memberId,
-      'memberName': memberName,
-      'items': items.map((item) => item.toMap()).toList(),
+      'saleDate': saleDate, // Firestore จะแปลงเป็น Timestamp
+      'memberId': memberId, // อาจเป็น null
+      'memberName': memberName, // อาจเป็น null
+      'items': items
+          .map((item) => item.toMap())
+          .toList(), // แปลง SaleItem เป็น List<Map>
       'totalAmount': totalAmount,
       'paymentMethod': paymentMethod,
     };

@@ -1,12 +1,20 @@
+// lib/models/product.dart
 // โมเดลข้อมูลสินค้า
 class Product {
-  String? id; // รหัสสินค้า (ได้จาก Firestore)
-  String name; // ชื่อสินค้า
-  double price; // ราคาสินค้า
-  int stock; // จำนวนสินค้าในคลัง
-  String? imageUrl; // URL รูปภาพสินค้า (ไม่บังคับ)
-  String? description; // รายละเอียดสินค้า (ไม่บังคับ)
-  String category; // หมวดหมู่สินค้า
+  // รหัสสินค้า (ได้จาก Firestore)
+  String? id;
+  // ชื่อสินค้า (บังคับ)
+  String name;
+  // ราคาสินค้า (บังคับ)
+  double price;
+  // จำนวนสินค้าในคลัง (บังคับ)
+  int stock;
+  // URL รูปภาพสินค้า (ไม่บังคับ)
+  String? imageUrl;
+  // รายละเอียดสินค้า (ไม่บังคับ)
+  String? description;
+  // หมวดหมู่สินค้า (บังคับ)
+  String category;
 
   // Constructor
   Product({
@@ -22,13 +30,14 @@ class Product {
   // แปลงข้อมูลจาก Firestore มาเป็น Object
   factory Product.fromMap(Map<String, dynamic> map, String documentId) {
     return Product(
-      id: documentId,
-      name: map['name'] ?? '',
-      price: (map['price'] ?? 0).toDouble(),
-      stock: map['stock'] ?? 0,
-      imageUrl: map['imageUrl'],
-      description: map['description'],
-      category: map['category'] ?? 'ไม่มีหมวดหมู่',
+      id: documentId, // กำหนดรหัสจาก Firestore
+      name: map['name'] ?? '', // ค่าเริ่มต้นถ้าไม่มีชื่อ
+      price: (map['price'] ?? 0).toDouble(), // แปลงเป็น double
+      stock: map['stock'] ?? 0, // ค่าเริ่มต้นถ้าไม่มีสต็อก
+      imageUrl: map['imageUrl'], // อาจเป็น null
+      description: map['description'], // อาจเป็น null
+      category:
+          map['category'] ?? 'ไม่มีหมวดหมู่', // ค่าเริ่มต้นถ้าไม่มีหมวดหมู่
     );
   }
 
@@ -38,8 +47,8 @@ class Product {
       'name': name,
       'price': price,
       'stock': stock,
-      'imageUrl': imageUrl,
-      'description': description,
+      'imageUrl': imageUrl, // จะเป็น null ถ้าไม่มี
+      'description': description, // จะเป็น null ถ้าไม่มี
       'category': category,
     };
   }

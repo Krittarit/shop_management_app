@@ -1,3 +1,4 @@
+// lib/screens/sale/sale_history.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
@@ -13,33 +14,34 @@ class SaleHistoryScreen extends StatefulWidget {
 }
 
 class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
-  // ตัวแปรสำหรับกรองข้อมูล
+  // ตัวแปรสำหรับกรองวันที่
   DateTime _startDate = DateTime.now().subtract(const Duration(days: 30));
   DateTime _endDate = DateTime.now();
 
   @override
   Widget build(BuildContext context) {
+    // ดึง SaleService
     final saleService = Provider.of<SaleService>(context);
 
-    // กรองรายการขายตามช่วงวันที่
+    // กรองการขายตามวันที่
     final filteredSales = saleService.getSalesByDateRange(_startDate, _endDate);
 
-    // คำนวณยอดขายรวม
+    // คำนวณยอดรวม
     final totalSales = saleService.calculateTotalSales(filteredSales);
 
-    // จัดรูปแบบวันที่
+    // ตั้งค่ารูปแบบวันที่และเงิน
     final dateFormat = DateFormat('d MMM yyyy', 'th');
-
-    // จัดรูปแบบเงิน
     final currencyFormat = NumberFormat.currency(locale: 'th_TH', symbol: '฿');
 
     return Scaffold(
+      // แถบด้านบน
       appBar: AppBar(
         title: const Text('ประวัติการขาย'),
       ),
+      // เนื้อหาหลัก
       body: Column(
         children: [
-          // ส่วนกรองข้อมูล
+          // ส่วนกรองวันที่
           Card(
             margin: const EdgeInsets.all(16),
             child: Padding(
@@ -57,7 +59,7 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      // ปุ่มเลือกวันที่เริ่มต้น
+                      // วันที่เริ่มต้น
                       Expanded(
                         child: InkWell(
                           onTap: () => _selectDate(context, true),
@@ -71,7 +73,7 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
                         ),
                       ),
                       const SizedBox(width: 16),
-                      // ปุ่มเลือกวันที่สิ้นสุด
+                      // วันที่สิ้นสุด
                       Expanded(
                         child: InkWell(
                           onTap: () => _selectDate(context, false),
@@ -87,7 +89,7 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  // ปุ่มตัวกรองด่วน
+                  // ปุ่มกรองด่วน
                   SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
@@ -96,12 +98,11 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
                           label: 'วันนี้',
                           onTap: () {
                             setState(() {
-                              // แก้ไขจาก DateTime.now() เป็นเวลาเริ่มต้นและสิ้นสุดของวันนี้
                               final now = DateTime.now();
-                              _startDate = DateTime(now.year, now.month,
-                                  now.day, 0, 0, 0); // 00:00:00
-                              _endDate = DateTime(now.year, now.month, now.day,
-                                  23, 59, 59); // 23:59:59
+                              _startDate = DateTime(
+                                  now.year, now.month, now.day, 0, 0, 0);
+                              _endDate = DateTime(
+                                  now.year, now.month, now.day, 23, 59, 59);
                             });
                           },
                         ),
@@ -143,7 +144,7 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
             ),
           ),
 
-          // ส่วนสรุปยอดขาย
+          // สรุปยอดรวม
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Card(
@@ -173,7 +174,7 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
             ),
           ),
 
-          // ส่วนรายการประวัติการขาย
+          // รายการการขาย
           Expanded(
             child: filteredSales.isEmpty
                 ? const Center(
@@ -194,7 +195,7 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
     );
   }
 
-  // สร้าง Widget ตัวกรองแบบชิพ
+  // สร้างปุ่มกรองด่วน
   Widget _buildFilterChip(
       {required String label, required VoidCallback onTap}) {
     return Padding(
@@ -206,7 +207,7 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
     );
   }
 
-  // แสดงไดอะล็อกเลือกวันที่
+  // เปิด DatePicker สำหรับเลือกวันที่
   Future<void> _selectDate(BuildContext context, bool isStartDate) async {
     final initialDate = isStartDate ? _startDate : _endDate;
     final DateTime? picked = await showDatePicker(
@@ -227,13 +228,11 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
       setState(() {
         if (isStartDate) {
           _startDate = picked;
-          // ถ้าวันที่เริ่มต้นมากกว่าวันที่สิ้นสุด ให้ปรับวันที่สิ้นสุดด้วย
           if (_startDate.isAfter(_endDate)) {
             _endDate = _startDate;
           }
         } else {
           _endDate = picked;
-          // ถ้าวันที่สิ้นสุดน้อยกว่าวันที่เริ่มต้น ให้ปรับวันที่เริ่มต้นด้วย
           if (_endDate.isBefore(_startDate)) {
             _startDate = _endDate;
           }
@@ -242,30 +241,31 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
     }
   }
 
-  // สร้าง Widget แสดงรายการขาย
+  // สร้างรายการการขาย
   Widget _buildSaleItem(BuildContext context, Sale sale, DateFormat dateFormat,
       NumberFormat currencyFormat) {
-    // จัดรูปแบบวันที่และเวลา
+    // ตั้งค่ารูปแบบวันที่และเวลา
     final dateTimeFormat = DateFormat('d MMM yyyy HH:mm', 'th');
 
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       child: ExpansionTile(
+        // หัวข้อ: วันที่และเวลา
         title: Text(
           dateTimeFormat.format(sale.saleDate),
           style: const TextStyle(
             fontWeight: FontWeight.bold,
           ),
         ),
+        // รายละเอียดย่อย
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // แสดงชื่อลูกค้า (ถ้ามี)
             if (sale.memberName != null) Text('ลูกค้า: ${sale.memberName}'),
-            // แสดงจำนวนรายการสินค้า
             Text('${sale.items.length} รายการ'),
           ],
         ),
+        // ยอดรวม
         trailing: Text(
           currencyFormat.format(sale.totalAmount),
           style: const TextStyle(
@@ -274,14 +274,13 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
             color: Colors.green,
           ),
         ),
-        // ส่วนแสดงรายละเอียดเมื่อกดขยาย
+        // รายละเอียดเมื่อขยาย
         children: [
           Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // แสดงรายการสินค้า
                 const Text(
                   'รายการสินค้า',
                   style: TextStyle(
@@ -300,7 +299,6 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
                       ),
                     )),
                 const Divider(),
-                // แสดงข้อมูลการชำระเงิน
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -319,7 +317,6 @@ class _SaleHistoryScreenState extends State<SaleHistoryScreen> {
                     ),
                   ],
                 ),
-                // แสดงข้อมูลสมาชิก (ถ้ามี)
                 if (sale.memberName != null) ...[
                   const SizedBox(height: 8),
                   Row(
